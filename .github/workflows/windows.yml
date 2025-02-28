@@ -13,5 +13,10 @@ jobs:
     - run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
     - run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
     - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssw0rd!" -Force)
-    - name: Create Tunnel
-      run: ssh -p 443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R0:localhost:3389 tcp@eu.a.pinggy.io
+    - name: Create Tunnel and Capture Output
+      run: |
+        $sshProcess = Start-Process -FilePath "ssh" -ArgumentList "-p 443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R0:localhost:3389 tcp@eu.a.pinggy.io" -PassThru -NoNewWindow -RedirectStandardOutput output.txt -RedirectStandardError error.txt
+        Start-Sleep -Seconds 10  # Wait for the SSH process to establish the tunnel
+        Get-Content output.txt
+        Get-Content error.txt
+      shell: pwsh
